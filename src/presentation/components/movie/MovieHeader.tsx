@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { useWindowDimensions, View, Image, Text, Pressable, StyleSheet } from "react-native";
-import Icons from 'react-native-vector-icons/FontAwesome6';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface Props {
   // movie: FullMovie;
@@ -34,14 +34,8 @@ export const MovieHeader = ({ poster, originalTitle, title }: Props) => {
       </View>
 
       <View style={styles.backButton}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-        >
-          <Icons 
-            name="camera"
-            size={20}
-            color="white"
-          />
+        <Pressable onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={30} color="white" />
         </Pressable>
       </View>
 

@@ -7,7 +7,7 @@ import * as UseCases from '../../core/use-cases';
 
 export const useMovie = (peliculaId: number) => {
 
-    const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [movie, setMovie] = useState<FullMovie>();
   const [cast, setCast] = useState<Cast[]>();
 
