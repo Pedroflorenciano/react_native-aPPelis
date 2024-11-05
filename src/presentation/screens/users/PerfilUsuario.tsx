@@ -83,6 +83,12 @@ export const PerfilUsuario = () => {
             <Icon name="token" size={20} color="black" />
             <Text> Registro</Text>
           </Pressable>
+
+          <Text style={{marginVertical: 15}}>COMENTARIOS</Text>
+          <Pressable onPress={() => navigation.navigate('Mensajes')} style={{flexDirection: 'row', marginBottom: 10}}>
+            <Icon name="chat" size={20} color="black" />
+            <Text> Registro de Comentarios</Text>
+          </Pressable>
         </View>
 
       </View>
