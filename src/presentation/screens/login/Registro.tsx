@@ -3,12 +3,14 @@ import { Alert, Text, TouchableOpacity, View, StyleSheet, Pressable } from 'reac
 import { TextInput } from 'react-native-gesture-handler';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { auth, appFirebase } from "../../../infrastructure/firebase/crendenciales";
 import { RootStackParams } from '../../navigations/AppNavigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
 export const Registro = () => {
   const navigation = useNavigation<NavigationProp<RootStackParams>>();
@@ -21,9 +23,13 @@ export const Registro = () => {
 
   const registro = async () => {
     try {
+      // Crear el usuario en Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
 
+      // Cargar la imagen de perfil predeterminada y obtener la URL
+
+      // Guardar los datos del usuario en Firestore junto con la URL de la imagen de perfil
       await setDoc(doc(db, 'users', userId), {
         name,
         email,
@@ -31,15 +37,27 @@ export const Registro = () => {
         city,
       });
 
-      navigation.navigate('Home');
+      Alert.alert("Registro exitoso", "Usuario registrado correctamente.");
+      navigation.navigate('Home'); // Redirecciona al usuario a la pantalla de inicio
     } catch (error) {
-      console.error("Error en el registro:", error);
-      Alert.alert('Error', 'Hubo un problema con el registro');
+      if (error instanceof Error && "code" in error) {
+        const firebaseError = error as { code: string; message: string };
+        if (firebaseError.code === 'auth/email-already-in-use') {
+          Alert.alert("Error", "Este correo electrónico ya está en uso. Por favor, usa otro.");
+        } else if (firebaseError.message.includes("Network request failed")) {
+          Alert.alert("Error de red", "No se pudo conectar. Por favor, verifica tu conexión a Internet.");
+        } else {
+          console.error("Error en el registro:", error);
+          Alert.alert("Error", "Hubo un problema con el registro.");
+        }
+      } else {
+        console.error("Error desconocido en el registro:", error);
+        Alert.alert("Error", "Ocurrió un error inesperado. Inténtalo de nuevo más tarde.");
+      }
     }
   };
 
   return (
-
     <View style={GlobalStyle.padre}>
       <View style={GlobalStyle.header}>
         <Pressable onPress={() => navigation.goBack()}>
@@ -60,7 +78,6 @@ export const Registro = () => {
               <Text style={GlobalStyle.textoBoton}>Registrar</Text>
             </TouchableOpacity>
           </View>
-
         </View>
       </View>
     </View>
@@ -75,7 +92,7 @@ const GlobalColors = {
   sombra: '#000',
   blanco: 'white',
   negro: 'black'
-}
+};
 
 const GlobalStyle = StyleSheet.create({
   padre: {
@@ -93,18 +110,6 @@ const GlobalStyle = StyleSheet.create({
     color: GlobalColors.secundario,
     fontSize: 20,
     marginHorizontal: 10
-  },
-  profile: {
-    marginTop: -100,
-    resizeMode: 'contain',
-    width: 150,
-    marginBottom: -150
-  },
-  profileHeader: {
-    marginTop: -130,
-    resizeMode: 'contain',
-    width: 150,
-    marginBottom: -150
   },
   content: {
     flex: 1,
@@ -127,18 +132,9 @@ const GlobalStyle = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  cajaTexto: {
-    paddingVertical: 5,
-    backgroundColor: '#cccccc40',
-    borderRadius: 10,
-    marginVertical: 10
-  },
   tarjeta2: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  PadreBoton: {
-    alignItems: 'center'
   },
   cajaBoton: {
     backgroundColor: GlobalColors.primario,
@@ -146,14 +142,10 @@ const GlobalStyle = StyleSheet.create({
     paddingVertical: 20,
     width: 150,
     marginTop: 20,
-
   },
   textoBoton: {
     textAlign: 'center',
     color: GlobalColors.blanco,
-  },
-  botonRes: {
-    marginTop: 20,
   },
   input: {
     paddingHorizontal: 15,
@@ -162,8 +154,4 @@ const GlobalStyle = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 10,
   },
-  botonLink: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-})
+});

@@ -1,6 +1,7 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD-biXz1u0Aca6_fHuGyAzLDz9I1V_5dTE",
@@ -11,11 +12,11 @@ const firebaseConfig = {
   appId: "1:406973365686:web:c91cbdf7181a4f2ae11517"
 };
 
-// Asegúrate de que Firebase solo se inicializa una vez
-const appFirebase = initializeApp(firebaseConfig);
+// Inicializar Firebase solo si no está ya inicializado
+let appFirebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-// Exporta instancias de Auth y Firestore
 const auth = getAuth(appFirebase);
 const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
-export { appFirebase, auth, db };
+export { appFirebase, auth, db, storage };

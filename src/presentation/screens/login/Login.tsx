@@ -14,7 +14,6 @@ const Login = () => {
   const logueo = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('Inicio de sesión exitoso');
       navigation.navigate('Home');
     } catch (error) {
       console.error('Error en el inicio de sesión:', error);
@@ -89,7 +88,7 @@ const GlobalStyle = StyleSheet.create({
     marginBottom: -150,
   },
   profileHeader: {
-    marginTop: -110,
+    marginTop: -120,
     resizeMode: 'contain',
     width: 150,
     marginBottom: -150,

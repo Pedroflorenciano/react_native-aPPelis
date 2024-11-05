@@ -1,5 +1,5 @@
 import React from 'react'
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useMovies } from '../../hooks/useMovies'
 import { ScrollView } from 'react-native-gesture-handler';
 import { PosterCarrusel } from '../../components/movies/PosterCarrusel';
@@ -13,7 +13,9 @@ export const HomeScreens = () => {
   const navigation = useNavigation<NavigationProp<RootStackParams>>();
 
   if (isLoading) {
-    return (<Text>Cargando...</Text>)
+    return (<View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ActivityIndicator size="large" color="#e30613" />
+    </View>)
   }
   return (
     <ScrollView style={Style.header}>
@@ -45,7 +47,7 @@ const Style = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: -10
+    marginVertical: -15
   },
   iconButton: {
     position: 'absolute',

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, Alert, StyleSheet, TouchableOpacity, Image, Pressable } from 'react-native';
 import { auth } from "../../../infrastructure/firebase/crendenciales";
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { signOut, updateEmail, updatePassword } from 'firebase/auth';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParams } from '../../navigations/AppNavigation';
 
 const db = getFirestore();
 const storage = getStorage();
 
-// Definimos la interfaz para el tipo de datos del usuario
 interface UserData {
   name: string;
   email: string;
@@ -19,6 +21,8 @@ interface UserData {
 }
 
 export const PerfilUsuario = () => {
+  const navigation = useNavigation<NavigationProp<RootStackParams>>();
+
   const [userData, setUserData] = useState<UserData>({
     name: '',
     email: '',
@@ -56,7 +60,7 @@ export const PerfilUsuario = () => {
       const uri = result.assets[0].uri;
       if (uri) {
         const uploadUrl = await uploadImageAsync(uri);
-        if (uploadUrl) { // Verifica que `uploadUrl` sea válido antes de llamarlo
+        if (uploadUrl) { 
           setUserData({ ...userData, profileImageUrl: uploadUrl });
           await updateProfileImage(uploadUrl);
         }
@@ -71,7 +75,7 @@ export const PerfilUsuario = () => {
     if (user) {
       const storageRef = ref(storage, `profileImages/${user.uid}`);
       await uploadBytes(storageRef, blob);
-      return await getDownloadURL(storageRef); // Devuelve la URL como `string`
+      return await getDownloadURL(storageRef); 
     }
     throw new Error("Usuario no autenticado");
   };
@@ -96,14 +100,12 @@ export const PerfilUsuario = () => {
       if (user) {
         const userRef = doc(db, 'users', user.uid);
 
-        // Actualizar datos en Firestore
         await updateDoc(userRef, {
           name: userData.name,
           age: userData.age,
           city: userData.city,
         });
 
-        // Actualizar email y contraseña en Authentication
         if (newEmail) await updateEmail(user, newEmail);
         if (newPassword) await updatePassword(user, newPassword);
 
@@ -117,58 +119,60 @@ export const PerfilUsuario = () => {
 
   const handleLogout = async () => {
     await signOut(auth);
+    navigation.navigate('Login');
     Alert.alert("Sesión cerrada", "Has cerrado sesión correctamente.");
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Perfil de Usuario</Text>
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={30} color="white" />
+        </Pressable>
+        <Text style={styles.title}>Usuario</Text>
+      </View>
 
-      <TouchableOpacity onPress={pickImage}>
-        <Image
-          source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : require('../../../assets/default-profile.png')}
-          style={styles.profileImage}
+      <View style={styles.body}>
+        <TextInput
+          style={styles.input}
+          placeholder="Nombre"
+          value={userData.name}
+          onChangeText={(text) => setUserData({ ...userData, name: text })}
         />
-      </TouchableOpacity>
-      <Text style={styles.imageText}>Toca la imagen para cambiarla</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Edad"
+          value={userData.age}
+          keyboardType="numeric"
+          onChangeText={(text) => setUserData({ ...userData, age: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Ciudad"
+          value={userData.city}
+          onChangeText={(text) => setUserData({ ...userData, city: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nuevo correo electrónico"
+          value={newEmail}
+          onChangeText={setNewEmail}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nueva contraseña"
+          secureTextEntry
+          value={newPassword}
+          onChangeText={setNewPassword}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nombre"
-        value={userData.name}
-        onChangeText={(text) => setUserData({ ...userData, name: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Edad"
-        value={userData.age}
-        keyboardType="numeric"
-        onChangeText={(text) => setUserData({ ...userData, age: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Ciudad"
-        value={userData.city}
-        onChangeText={(text) => setUserData({ ...userData, city: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Nuevo correo electrónico"
-        value={newEmail}
-        onChangeText={setNewEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Nueva contraseña"
-        secureTextEntry
-        value={newPassword}
-        onChangeText={setNewPassword}
-      />
-
-      <Button title="Actualizar perfil" onPress={handleUpdateProfile} />
-      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-        <Text style={styles.logoutText}>Cerrar sesión</Text>
-      </TouchableOpacity>
+        <Pressable onPress={handleUpdateProfile} style={styles.logoutButton}>
+          <Text style={styles.logoutText}>Actualizar</Text>
+        </Pressable>
+        <TouchableOpacity onPress={handleLogout} style={{alignItems: 'center'}}>
+          <Text style={{color: '#706f6f'}}>Cerrar sesión</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -176,15 +180,26 @@ export const PerfilUsuario = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     justifyContent: 'center',
     backgroundColor: '#f8f8f8',
   },
+  header: {
+    flexDirection: 'row',
+    backgroundColor: '#e30613',
+    padding: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    alignItems:'center'
+  },
+  body: {
+    flex: 1,
+    padding: 20,
+  },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    marginHorizontal: 15,
+    color: 'white',
+    textAlign: 'center'
   },
   profileImage: {
     width: 100,
@@ -206,11 +221,15 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   logoutButton: {
-    marginTop: 20,
+    backgroundColor: '#e30613',
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 10,
     alignItems: 'center',
   },
   logoutText: {
-    color: 'red',
+    color: 'white',
+    fontSize: 20,
   },
 });
 
