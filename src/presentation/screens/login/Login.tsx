@@ -3,8 +3,9 @@ import { StyleSheet, Alert, Image, Text, TouchableOpacity, View, Pressable } fro
 import { TextInput } from 'react-native-gesture-handler';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { auth } from '../../../infrastructure/firebase/crendenciales'; // Asegúrate de que la ruta sea correcta
+import { auth } from '../../../infrastructure/firebase/crendenciales'; // Ajusta la ruta si es necesario
 import { RootStackParams } from '../../navigations/AppNavigation';
+import NetInfo from '@react-native-community/netinfo';
 
 const Login = () => {
   const navigation = useNavigation<NavigationProp<RootStackParams>>();
@@ -12,7 +13,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   const logueo = async () => {
+    // Verificar estado de conexión antes de intentar iniciar sesión
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      Alert.alert("Error de red", "No estás conectado a Internet.");
+      return;
+    }
+    
     try {
+      // Intentar iniciar sesión con email y contraseña
       await signInWithEmailAndPassword(auth, email, password);
       navigation.navigate('Home');
     } catch (error) {

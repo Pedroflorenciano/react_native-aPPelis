@@ -12,10 +12,9 @@ const firebaseConfig = {
   appId: "1:406973365686:web:c91cbdf7181a4f2ae11517"
 };
 
-// Inicializar Firebase solo si no está ya inicializado
-let appFirebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const appFirebase = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-const auth = getAuth(appFirebase);
+const auth = getAuth(appFirebase); // Sin `initializeAuth`
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 

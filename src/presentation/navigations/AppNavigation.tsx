@@ -6,12 +6,18 @@ import Registro from '../screens/login/Registro';
 import { HomeScreens } from '../screens/home/HomeScreens';
 import PerfilUsuario from '../screens/users/PerfilUsuario';
 import { DetailsScreens } from '../screens/details/DetailsScreens';
+import { Perfil } from '../screens/users/Perfil';
+import { ConfRegistro } from '../screens/users/ConfRegistro';
+
+
 
 export type RootStackParams = {
     Home: undefined;
     Login: undefined;
     Registro: undefined;
     Users: undefined;
+    Perfil: undefined;
+    ConfiUser: undefined; 
     Details: { peliculaId: number };
 };
 
@@ -26,6 +32,8 @@ export const AppNavigation = () => {
         <Stack.Screen name="Home" component={HomeScreens} />
         <Stack.Screen name="Users" component={PerfilUsuario} />
         <Stack.Screen name="Details" component={DetailsScreens} />
+        <Stack.Screen name="Perfil" component={Perfil} />
+        <Stack.Screen name="ConfiUser" component={ConfRegistro} />
       </Stack.Navigator>
     </NavigationContainer>
   );
